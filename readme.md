@@ -1,6 +1,6 @@
 # Enterprise Incident Intelligence
 
-A Python API built with FastAPI. The current starter application exposes a health-check endpoint.
+A Python API built with FastAPI for creating and retrieving incidents.
 
 ## Requirements
 
@@ -32,6 +32,58 @@ The health endpoint is available at `http://127.0.0.1:8000/health` and returns:
 
 FastAPI's interactive API documentation is available at `http://127.0.0.1:8000/docs`.
 
+## API endpoints
+
+| Method | Path | Purpose | Expected response codes |
+| --- | --- | --- | --- |
+| `GET` | `/health` | Check that the API process is responding. | `200 OK` |
+| `POST` | `/incidents` | Create an incident from a JSON request body. | `201 Created`, `422 Unprocessable Entity` for invalid input |
+| `GET` | `/incidents` | List all incidents currently in memory. | `200 OK` |
+| `GET` | `/incidents/{incident_id}` | Retrieve one incident by its integer ID. | `200 OK`, `404 Not Found` if no incident has that ID |
+
+### Create an incident
+
+Send JSON with all required `IncidentCreate` fields:
+
+```bash
+curl -X POST http://127.0.0.1:8000/incidents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Fabric pipeline refresh failed",
+    "description": "The pipeline stopped during data ingestion.",
+    "severity": "High",
+    "product": "Microsoft Fabric"
+  }'
+```
+
+A successful request returns `201 Created` and an `IncidentResponse`, including the assigned ID and default status:
+
+```json
+{
+  "title": "Fabric pipeline refresh failed",
+  "description": "The pipeline stopped during data ingestion.",
+  "severity": "High",
+  "product": "Microsoft Fabric",
+  "id": 1,
+  "status": "Open"
+}
+```
+
+If required fields are missing or values fail schema validation, FastAPI returns `422 Unprocessable Entity`.
+
+### List and retrieve incidents
+
+```bash
+curl http://127.0.0.1:8000/incidents
+curl http://127.0.0.1:8000/incidents/1
+```
+
+Both requests return `200 OK` when successful. The list endpoint returns an array (empty when there are no incidents). The detail endpoint returns `404 Not Found` with `{"detail":"Incident not found"}` if the ID is absent.
+
+### Temporary storage limitation
+
+Incidents are stored in a simple in-memory dictionary. They are lost when the application process restarts, and separate worker processes do not share the same data. This storage is suitable for development and learning, but not durable or consistent enough for production.
+
 ## Incident validation contract
 
 The Pydantic models in `app/schemas.py` define the current incident data contract:
@@ -41,7 +93,7 @@ The Pydantic models in `app/schemas.py` define the current incident data contrac
 - `severity` must be exactly `Low`, `Medium`, `High`, or `Critical`.
 - `IncidentResponse` includes the create fields, requires an integer `id`, and defaults `status` to `Open`. A supplied status must be exactly `Open`, `Investigating`, or `Resolved`.
 
-Pydantic checks and constructs model instances at runtime. Invalid or missing required data raises a `ValidationError`. If an API endpoint uses one of these models as its request body, FastAPI performs that validation for incoming requests and reports invalid input as a client error. The current application only exposes `/health`; it does not yet have incident endpoints.
+Pydantic checks and constructs model instances at runtime. The create endpoint uses `IncidentCreate` to validate incoming request bodies, and incident responses use `IncidentResponse`.
 
 By default, Pydantic may coerce compatible input values and ignore unknown fields. These models also do not trim whitespace, and `description` and `product` have no maximum length. Add stricter constraints if those behaviors do not fit the API's intended contract.
 
