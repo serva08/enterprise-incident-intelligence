@@ -1,16 +1,21 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.api.dependencies import get_incident_service
 from app.main import app
+from app.repositories.incident_repository import InMemoryIncidentRepository
+from app.services.incident_service import IncidentService
 
 
 client = TestClient(app)
 
 
 @pytest.fixture(autouse=True)
-def reset_incidents():
-    app.state.incidents.clear()
-    app.state.next_incident_id = 1
+def isolate_incident_repository():
+    repository = InMemoryIncidentRepository()
+    app.dependency_overrides[get_incident_service] = lambda: IncidentService(repository)
+    yield
+    app.dependency_overrides.pop(get_incident_service, None)
 
 
 def valid_incident():
