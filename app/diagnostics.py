@@ -10,6 +10,10 @@ class EvaluationResult:
     total: int
     accuracy: float
 
+    @property
+    def incorrect(self) -> int:
+        return self.total - self.correct
+
 
 class IncidentClassifier(Protocol):
     def classify(self, description: str) -> str:

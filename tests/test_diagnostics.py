@@ -42,6 +42,7 @@ def test_evaluate_classifier_reports_accuracy():
     result = evaluate_classifier(classifier, examples)
 
     assert result == EvaluationResult(correct=3, total=4, accuracy=0.75)
+    assert result.incorrect == 1
 
 
 def test_evaluate_classifier_rejects_empty_examples():
