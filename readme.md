@@ -97,6 +97,22 @@ Pydantic checks and constructs model instances at runtime. The create endpoint u
 
 By default, Pydantic may coerce compatible input values and ignore unknown fields. These models also do not trim whitespace, and `description` and `product` have no maximum length. Add stricter constraints if those behaviors do not fit the API's intended contract.
 
+## PySpark incident data preparation notebook
+
+The Databricks notebook source is [`pyspark/01_incident_data_preparation.py`](pyspark/01_incident_data_preparation.py). It uses six synthetic incidents, so it does not require or expose real incident data.
+
+The notebook demonstrates how to:
+
+- Create a Spark DataFrame with incident ID, product, category, and severity columns.
+- Filter incidents by product or severity and select only the columns needed for an analysis.
+- Group incidents by category or severity and count them; it also counts Critical incidents by product and category.
+- Trim leading and trailing whitespace from product and category values.
+- Separate rows with a missing or blank category from rows with a valid category.
+
+To use it in Databricks, import the `.py` file as a notebook source and run its cells in order. Databricks provides the `spark` session used to create the DataFrame. In the category-quality section, `invalid` contains rows with null or blank categories, while `valid` contains rows with a non-null, non-blank category.
+
+One learning note: the notebook's second filtering cell selects Critical incidents but assigns them to a variable named `fabric_incidents`; the variable name does not match the filter and would be clearer as `critical_incidents`.
+
 ## Run tests
 
 ```powershell
