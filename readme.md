@@ -113,6 +113,20 @@ To use it in Databricks, import the `.py` file as a notebook source and run its 
 
 One learning note: the notebook's second filtering cell selects Critical incidents but assigns them to a variable named `fabric_incidents`; the variable name does not match the filter and would be clearer as `critical_incidents`.
 
+## AI agent tool-calling practice
+
+The agent-tool example uses synthetic incidents in `app/agent_tools.py`. The `get_incident_stats()` function returns an aggregate count for a product, with an optional case-insensitive severity filter. It trims whitespace around product and severity inputs, rejects blank values, and does not modify incident data.
+
+`app/tool_definitions.py` describes the function and its JSON parameters for a tool-calling model. The model can request a tool by name and provide arguments, but it does not execute Python: application code must validate the request, dispatch only approved tools, run the Python function, and return its result. `practice_tool_call.py` demonstrates the argument-to-function step locally without calling an LLM or paid API.
+
+Run the focused tests with:
+
+```powershell
+python -m pytest tests/test_agent_tools.py
+```
+
+The tests cover product counts, optional and case-insensitive severity filtering, and whitespace around a product. Before connecting a real model, add a controlled dispatcher, validate all model-supplied arguments, enforce caller permissions, and keep tools read-only and narrowly scoped. Never turn model-provided text into arbitrary Python or SQL.
+
 ## Run tests
 
 ```powershell
