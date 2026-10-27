@@ -113,6 +113,21 @@ To use it in Databricks, import the `.py` file as a notebook source and run its 
 
 One learning note: the notebook's second filtering cell selects Critical incidents but assigns them to a variable named `fabric_incidents`; the variable name does not match the filter and would be clearer as `critical_incidents`.
 
+## PySpark supply-chain delivery analysis
+
+The notebook source is [`pyspark/03_supply_chain_orders.py`](pyspark/03_supply_chain_orders.py). It reads the `raw_olist_orders` table from the active Databricks catalog and schema, so that table must be available in the workspace before running the notebook. The notebook analyzes delivered orders and derives delivery duration, days late, and a binary late indicator. It then calculates overall delivery metrics and the late-delivery percentage by purchase month.
+
+Key PySpark learnings:
+
+- `to_timestamp()` and `to_date()` convert source strings into types suitable for date calculations.
+- `datediff()` measures elapsed calendar days. `greatest(..., 0)` makes early or on-time deliveries have zero late days, and `when()` turns that into a 1/0 flag.
+- `avg(is_late) * 100` calculates the percentage of late orders because the indicator is 1 for late and 0 otherwise.
+- The monthly aggregation groups only by `purchase_month`; grouping by `days_late` or `delivery_days` would create separate groups for each value rather than one metric per month.
+- Keep columns needed by later transformations. Selecting only `days_late` and `delivery_days` before the monthly calculation would drop `purchased_at` and `is_late`, which that calculation needs.
+- Sort by the timestamp column `purchase_month`, not the display label `month_year`, so months remain in chronological order rather than alphabetical order.
+
+The source is read-only and uses the Databricks `spark` session and `display()` helper. It does not write or modify the source table.
+
 ## AI agent tool-calling practice
 
 The agent-tool example uses synthetic incidents in `app/agent_tools.py`. The `get_incident_stats()` function returns an aggregate count for a product, with an optional case-insensitive severity filter. It trims whitespace around product and severity inputs, rejects blank values, and does not modify incident data.
