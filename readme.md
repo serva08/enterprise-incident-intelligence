@@ -1,4 +1,38 @@
-# Enterprise Incident Intelligence
+# Enterprise Data & AI Engineering Portfolio
+
+> I design and engineer scalable, production-focused Data & AI solutions, combining enterprise experience with modern data platforms, intelligent automation, and AI engineering to solve complex business challenges.
+
+This repository is a hands-on portfolio of small, focused projects demonstrating API engineering, PySpark data preparation, delivery analytics, and AI-ready application patterns. Examples use synthetic incident data or require explicitly provisioned Databricks tables; no employer or customer data is included.
+
+## Portfolio projects
+
+| Project | What it demonstrates | Start here |
+| --- | --- | --- |
+| **Enterprise Incident Intelligence API** | FastAPI, Pydantic contracts, incident endpoints, and in-memory persistence. This is a learning prototype, not a production deployment. | [`app/README.md`](app/README.md) |
+| **AI-ready diagnostics and agent tools** | Explainable rule-based classification, offline evaluation, a mock diagnostic provider, and a read-only function-calling example. No paid LLM API is used. | [`app/README.md`](app/README.md) |
+| **PySpark incident preparation** | Synthetic incident DataFrames, filtering, aggregation, normalization, and data-quality splits in Databricks. | [`pyspark/README.md`](pyspark/README.md) |
+| **Supply-chain delivery analytics** | Delivery duration and lateness features, aggregate metrics, and monthly late-delivery analysis in PySpark. | [`pyspark/README.md`](pyspark/README.md) |
+
+These are related learning projects in one repository, not a claim that every component is deployed or production-ready. See the project guides for current scope, setup, and limitations.
+
+## Repository map
+
+```text
+app/       FastAPI application, diagnostic logic, evaluation, and agent-tool examples
+tests/     Automated tests for the Python application
+pyspark/   Databricks notebook source files and their guide
+```
+
+## Quick start
+
+See the project guides for details. For the Python application and tests:
+
+```powershell
+python -m uvicorn app.main:app --reload
+python -m pytest
+```
+
+## Enterprise Incident Intelligence API
 
 A Python API built with FastAPI for creating and retrieving incidents.
 
@@ -115,7 +149,7 @@ One learning note: the notebook's second filtering cell selects Critical inciden
 
 ## PySpark supply-chain delivery analysis
 
-The notebook source is [`pyspark/03_supply_chain_orders.py`](pyspark/03_supply_chain_orders.py). It reads the `raw_olist_orders` table from the active Databricks catalog and schema, so that table must be available in the workspace before running the notebook. The notebook analyzes delivered orders and derives delivery duration, days late, and a binary late indicator. It then calculates overall delivery metrics and the late-delivery percentage by purchase month.
+The notebook source is [`pyspark/03_supply_chain_orders.py`](pyspark/03_supply_chain_orders.py). It reads the `raw_olist_orders` and `silver_delivery_performance` tables from the active Databricks catalog and schema, so both tables must be available in the workspace before running the notebook. The notebook analyzes delivered orders and derives delivery duration, days late, and a binary late indicator. It then calculates overall delivery metrics and the late-delivery percentage by purchase month.
 
 Key PySpark learnings:
 
